@@ -42,25 +42,20 @@ CHIP ALU {
         ng; // 1 if (out < 0),  0 otherwise
 
     PARTS:
+        And16 (a=x, b=false, out=zero-x);
+        Not16 (in=x-or-zero-x, out=not-x-or-zero-x);
+        And16 (a=y, b=false, out=zero-y);
+        Not16 (in=y-or-zero-y, out=not-y-or-zero-y);
+        Add16 (a=x-result, b=y-result, out=x-add-y);
+        And16 (a=x-result, b=y-result, out=x-and-y);
+        Not16 (in=result, out=not-result);
 
-    And16 (a=x, b=false, out=dzx);            // zero the x input
-    And16 (a=y, b=false, out=dzy);            // zero the y input
+        Mux16 (a=x, b=zero-x, sel=zx, out=x-or-zero-x);
+        Mux16 (a=y, b=zero-y, sel=zy, out=y-or-zero-y);
 
-    Mux16 (a=x, b=dzx, sel=zx, out=mx1);      // x or dzx
-    Mux16 (a=y, b=dzy, sel=zy, out=my1);      // y or dzy
+        Mux16 (a=x-or-zero-x, b=not-x-or-zero-x, sel=nx, out=x-result);
+        Mux16 (a=y-or-zero-y, b=not-y-or-zero-y, sel=ny, out=y-result);
 
-    Not16 (in=mx1, out=dnx);                  // Negate the x input
-    Not16 (in=my1, out=dny);                  // Negate the y input
-
-    Mux16 (a=mx1, b=dnx, sel=nx, out=mx2);    // x or dnx
-    Mux16 (a=mx1, b=dny, sel=ny, out=my2);    // y or dny
-
-    Add16 (a=mx2, b=my2, out=add);            // x + y
-
-    Not16 (in=add, out=not);                  // negate ouput
-
-    Mux16 (a=add, b=not, sel=no, out=out);    // add or negate
-
-    Not (in=false, out=zr);
-    Not (in=true, out=ng);
+        Mux16 (a=x-and-y, b=x-add-y, sel=f, out=result);
+        Mux16 (a=result, b=not-result, sel=no, out=out);
 }
